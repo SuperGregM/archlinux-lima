@@ -119,7 +119,7 @@ Create a file `archlinux.yaml` with the following content.
 
 	- location: "https://github.com/mschirrmeister/archlinux-lima/releases/download/20250513-0/Arch-Linux-aarch64-cloudimg-20250513.0.qcow2.xz"
 	  arch: "aarch64"
-	  digest: "sha512:4e7a3494b6111f9834d787f5ae1c3eb1e8cfd9b3e131527833e5a0b0f898615afce79906ec3c31f04c90a59eaf430c886bc197446337b27bdc3dc10b48ca2abf"
+	  digest: "sha512:6c2dbf4876f4636e9c69a0b3e66d7d9ba1697db23cd3f8437add4bca59dc62007cff13ecb5344084e5704cc5e8666d1864edf95b3fdccf9105d5f0b449db5c55"
 	# Hint: run `limactl prune` to invalidate the cache
 
 	mounts:
