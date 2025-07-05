@@ -70,7 +70,7 @@ If you want to build an image yourself, clone the repo and build it locally.
 1. Build the image with a Lima VM
 
    ```shell
-   limactl start --name build-arch template://debian
+   limactl start --name build-arch template://ubuntu
    limactl shell build-arch
    ```
 
