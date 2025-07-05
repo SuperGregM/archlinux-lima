@@ -250,6 +250,12 @@ colorecho "$GREEN" "Clearing package cache ..."
 printf "y\ny\n" | pacman -Scc
 END
 
+# --- Zero out free space in root partition to improve compressibility ---
+colorecho "$GREEN" "Zeroing out free space in root partition ..."
+sudo dd if=/dev/zero of=/mnt/arch-root/zero.fill bs=1M status=progress || true
+sudo sync
+sudo rm -f /mnt/arch-root/zero.fill
+
 # --- Unmount boot if still mounted ---
 if mountpoint -q /mnt/arch-root/boot; then
     sudo umount /mnt/arch-root/boot || sudo umount -l /mnt/arch-root/boot
