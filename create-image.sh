@@ -179,7 +179,8 @@ colorecho "$GREEN" "Refresh package database..."
 pacman -Sy --noconfirm
 
 colorecho "$GREEN" "Installing latest linux-aarch64 kernel..."
-pacman -Sy linux-aarch64 --needed --noconfirm --nodeps --nodeps
+pacman -Sy linux-aarch64 --needed --noconfirm --nodeps
+
 colorecho "$GREEN" "Removing linux-firmware ..."
 pacman -Rdd linux-firmware linux-firmware-whence --noconfirm
 
@@ -190,12 +191,14 @@ colorecho "$GREEN" "Installing cloud-init ..."
 curl -LO --output-dir /tmp/ https://gist.githubusercontent.com/mschirrmeister/a009b8ce91a20bcc214c66f62aced9c9/raw/8c66f4d9bfb3ea05828f37ce420680eb007191de/cloud-init-23.1.2-2-any.pkg.tar.xz
 pacman -U /tmp/cloud-init-23.1.2-2-any.pkg.tar.xz --noconfirm
 rm -f /tmp/cloud-init-23.1.2-2-any.pkg.tar.xz
+
 colorecho "$GREEN" "Enabling cloud-init services ..."
 systemctl enable cloud-init-local.service
 systemctl enable cloud-init.service
 systemctl enable cloud-config.service
 systemctl enable cloud-final.service
 systemctl enable cloud-init-hotplugd.socket
+
 colorecho "$GREEN" "Clearing package cache ..."
 printf "y\ny\n" | pacman -Scc
 END
@@ -205,8 +208,8 @@ colorecho "$GREEN" "Copying boot partition files ..."
 sudo cp -r /mnt/arch-root/boot/* /mnt/arch-boot/
 sudo rm -rf /mnt/arch-root/boot/*
 
-# --- GRUB Install ---
-colorecho "$GREEN" "Installing GRUB bootloader ..."
+# --- Setting up boot partition ---
+colorecho "$GREEN" "Mounting boot partition ..."
 sudo mkdir -p /mnt/arch-root/boot
 sudo mount $BOOTP /mnt/arch-root/boot
 
@@ -234,6 +237,7 @@ pacman -Sy cloud-guest-utils --needed --noconfirm
 
 colorecho "$GREEN" "Append the following cmdline to grub: "
 sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\".*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"console=ttyAMA0\"/" /etc/default/grub
+
 colorecho "$GREEN" "Installing GRUB ..."
 grub-install --target=arm64-efi --efi-directory=/boot --removable
 colorecho "$GREEN" "Generating GRUB config ..."
@@ -241,8 +245,10 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 colorecho "$GREEN" "Updating mirrors..."
 sed -i 's/^# Server/Server/' /etc/pacman.d/mirrorlist.save
-colorecho "$GREEN" "Installing pacman-contrib..."   
+
+colorecho "$GREEN" "Installing pacman-contrib..."
 pacman -S pacman-contrib --needed --noconfirm
+
 colorecho "$GREEN" "Ranking mirrors..."
 rankmirrors -n 5 /etc/pacman.d/mirrorlist.save | grep -v '^\s*#' | tee /etc/pacman.d/mirrorlist
 
