@@ -228,7 +228,10 @@ colorecho "$GREEN" "Installing GRUB bootloader ..."
 pacman-key --init
 pacman-key --populate archlinuxarm
 pacman -Sy grub efibootmgr --noconfirm
-colorecho "$GREEN" "Clearing package cache ..."
+
+colorecho "$GREEN" "Installing cloud-guest-utils for rootfs auto-resize ..."
+pacman -Sy cloud-guest-utils --needed --noconfirm
+
 colorecho "$GREEN" "Append the following cmdline to grub: "
 sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\".*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"console=ttyAMA0\"/" /etc/default/grub
 colorecho "$GREEN" "Installing GRUB ..."
@@ -242,6 +245,8 @@ colorecho "$GREEN" "Installing pacman-contrib..."
 pacman -S pacman-contrib --needed --noconfirm
 colorecho "$GREEN" "Ranking mirrors..."
 rankmirrors -n 5 /etc/pacman.d/mirrorlist.save | grep -v '^\s*#' | tee /etc/pacman.d/mirrorlist
+
+colorecho "$GREEN" "Clearing package cache ..."
 printf "y\ny\n" | pacman -Scc
 END
 
