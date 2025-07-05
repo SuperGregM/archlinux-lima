@@ -274,14 +274,14 @@ QCOW2_IMG="${IMAGE_NAME%.img}.qcow2"
 VMDK_IMG="${IMAGE_NAME%.img}.vmdk"
 
 colorecho "$GREEN" "Creating VM images ..."
-sudo qemu-img convert -O qcow2 "$RAW_IMG" "$QCOW2_IMG"
-sudo qemu-img convert -O vmdk "$RAW_IMG" "$VMDK_IMG"
+sudo qemu-img convert -p -O qcow2 "$RAW_IMG" "$QCOW2_IMG"
+sudo qemu-img convert -p -O vmdk "$RAW_IMG" "$VMDK_IMG"
 
 if [ "$COMPRESS" = 1 ]; then
     colorecho "$GREEN" "Compressing images ..."
-    sudo xz -T 0 "$RAW_IMG"
-    sudo xz -T 0 "$QCOW2_IMG"
-    sudo xz -T 0 "$VMDK_IMG"
+    sudo xz -T 0 --verbose "$RAW_IMG"
+    sudo xz -T 0 --verbose "$QCOW2_IMG"
+    sudo xz -T 0 --verbose "$VMDK_IMG"
 fi
 
 colorecho "$GREEN" "All images created:"
