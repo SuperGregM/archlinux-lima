@@ -188,16 +188,13 @@ colorecho "$GREEN" "Running full system upgrade ..."
 pacman -Syu --noconfirm
 
 colorecho "$GREEN" "Installing cloud-init ..."
-curl -LO --output-dir /tmp/ https://gist.githubusercontent.com/mschirrmeister/a009b8ce91a20bcc214c66f62aced9c9/raw/8c66f4d9bfb3ea05828f37ce420680eb007191de/cloud-init-23.1.2-2-any.pkg.tar.xz
-pacman -U /tmp/cloud-init-23.1.2-2-any.pkg.tar.xz --noconfirm
-rm -f /tmp/cloud-init-23.1.2-2-any.pkg.tar.xz
+curl -LO --output-dir /tmp/ https://github.com/SuperGregM/archlinux-lima/releases/download/20250705-0/cloud-init-25.1.2-1-any.pkg.tar.xz
+pacman -U /tmp/cloud-init-25.1.2-1-any.pkg.tar.xz --needed --noconfirm
+rm -f /tmp/cloud-init-25.1.2-1-any.pkg.tar.xz
 
 colorecho "$GREEN" "Enabling cloud-init services ..."
-systemctl enable cloud-init-local.service
-systemctl enable cloud-init.service
-systemctl enable cloud-config.service
+systemctl enable cloud-init-main.service
 systemctl enable cloud-final.service
-systemctl enable cloud-init-hotplugd.socket
 
 colorecho "$GREEN" "Clearing package cache ..."
 printf "y\ny\n" | pacman -Scc
