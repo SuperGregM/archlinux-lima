@@ -1,0 +1,10 @@
+# Lima template for local Arch Linux ARM image
+images:
+- location: "https://github.com/SuperGregM/archlinux-lima/releases/download/20250706-0/Arch-Linux-aarch64-cloudimg-20250707.0.qcow2.xz"
+  arch: "aarch64"
+  digest: "sha256:e52df7a0f5af0cd0a2954c54c3cab5e57e15783ab2d7d239a2a1c04cc4d933eb"
+
+mounts:
+- location: "~"
+- location: "/tmp/lima"
+  writable: true
