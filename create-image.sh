@@ -188,9 +188,10 @@ colorecho "$GREEN" "Running full system upgrade ..."
 pacman -Syu --noconfirm
 
 colorecho "$GREEN" "Installing cloud-init ..."
-curl -LO --output-dir /tmp/ https://github.com/SuperGregM/archlinux-lima/releases/download/20250705-0/cloud-init-25.1.2-1-any.pkg.tar.xz
-pacman -U /tmp/cloud-init-25.1.2-1-any.pkg.tar.xz --needed --noconfirm
-rm -f /tmp/cloud-init-25.1.2-1-any.pkg.tar.xz
+cloudinit_pkg="cloud-init-25.1.2-1-any.pkg.tar.zst"
+curl -LO --output-dir /tmp/ "https://archive.archlinux.org/packages/c/cloud-init/$cloudinit_pkg"
+pacman -U /tmp/"$cloudinit_pkg" --needed --noconfirm
+rm -f /tmp/"$cloudinit_pkg"
 
 colorecho "$GREEN" "Enabling cloud-init services ..."
 systemctl enable cloud-init-main.service
