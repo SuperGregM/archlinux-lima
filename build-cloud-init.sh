@@ -55,9 +55,16 @@ BACKGROUND_WHITE=$'\e[47m'
 
 cloud_init_package_version="25.1.2-1"
 netplan_package_version="1.1.2-1"
+build_dir="/tmp/build"
 output_dir="/tmp/lima/output"
-build_cloud_init_dir="$HOME/build-cloud-init"
-build_netplan_dir="$HOME/build-netplan"
+cloud_init_dir="$build_dir/cloud-init"
+netplan_dir="$build_dir/netplan"
+pandoc_dir="$build_dir/pandoc-bin"
+
+# --- Preparation ---
+printf " %sCreating output directory...%s\n" "$TEXT_GREEN" "$FORMAT_RESET"
+mkdir -pv "$build_dir"
+cd "$build_dir"
 
 if ! command -v git &>/dev/null; then
     printf '\n %sInstalling git & base-devel%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
@@ -68,24 +75,27 @@ if ! command -v git &>/dev/null; then
 fi
 if ! command -v pandoc &>/dev/null; then
     printf '\n %sInstalling pandoc-bin from AUR%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-    git clone https://aur.archlinux.org/pandoc-bin.git "$HOME/.cache/pandoc-bin.git"
-    cd "$HOME/.cache/pandoc-bin.git" || exit
+    git clone https://aur.archlinux.org/pandoc-bin.git "$pandoc_dir"
+    cd "$pandoc_dir" || exit
     makepkg -si --noconfirm --needed
 fi
 
 case "$1" in
 -d | --delete)
     printf '\n %sDeleting build directories...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-    rm -rf "$build_cloud_init_dir"
-    rm -rf "$build_netplan_dir"
+    rm -rf "$build_dir"
     ;;
 -dc | --delete-cloud-init)
     printf '\n %sDeleting cloud-init build directory...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-    rm -rf "$build_cloud_init_dir"
+    rm -rf "$cloud_init_dir"
     ;;
 -dn | --delete-netplan)
     printf '\n %sDeleting netplan build directory...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-    rm -rf "$build_netplan_dir"
+    rm -rf "$netplan_dir"
+    ;;
+-dp | --delete-pandoc)
+    printf '\n %sDeleting pandoc-bin build directory...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
+    rm -rf "$pandoc_dir"
     ;;
 *)
     if [[ -z "$1" ]]; then
@@ -97,7 +107,8 @@ case "$1" in
         printf '  %sUsage: %s\n' "$TEXT_CYAN" "$FORMAT_RESET"
         printf ' %s -d  | --delete%s            : Delete build directories\n' "$TEXT_YELLOW" "$FORMAT_RESET"
         printf ' %s -dc | --delete-cloud-init%s : Delete cloud-init build directory\n' "$TEXT_YELLOW" "$FORMAT_RESET"
-        printf ' %s -dn | --delete-netplan%s    : Delete netplan build directory\n\n' "$TEXT_YELLOW" "$FORMAT_RESET"
+        printf ' %s -dn | --delete-netplan%s    : Delete netplan build directory\n' "$TEXT_YELLOW" "$FORMAT_RESET"
+        printf ' %s -dp | --delete-pandoc%s     : Delete pandoc-bin build directory\n\n' "$TEXT_YELLOW" "$FORMAT_RESET"
         exit 1
     fi
     ;;
@@ -117,33 +128,33 @@ checkout_version_tag() {
 
 if ! command -v netplan &>/dev/null; then
     printf '\n %sBuilding netplan from gitlab.archlinux.org...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-    if [[ ! -d "$build_netplan_dir" ]]; then
-        git clone https://gitlab.archlinux.org/archlinux/packaging/packages/netplan.git "$build_netplan_dir"
-        cd "$build_netplan_dir"
+    if [[ ! -d "$netplan_dir" ]]; then
+        git clone https://gitlab.archlinux.org/archlinux/packaging/packages/netplan.git "$netplan_dir"
+        cd "$netplan_dir"
         git fetch --tags
         checkout_version_tag "$netplan_package_version"
-        sed -i 's/^arch=.*/arch=(any)/' "$build_netplan_dir/PKGBUILD"
+        sed -i 's/^arch=.*/arch=(any)/' "$netplan_dir/PKGBUILD"
     fi
     makepkg -si --noconfirm
 fi
 
 printf '\n %sBuilding cloud-init from gitlab.archlinux.org...%s\n' "$TEXT_GREEN" "$FORMAT_RESET"
-if [[ ! -d "$build_cloud_init_dir" ]]; then
-    git clone https://gitlab.archlinux.org/archlinux/packaging/packages/cloud-init.git "$build_cloud_init_dir"
-    cd "$build_cloud_init_dir"
+if [[ ! -d "$cloud_init_dir" ]]; then
+    git clone https://gitlab.archlinux.org/archlinux/packaging/packages/cloud-init.git "$cloud_init_dir"
+    cd "$cloud_init_dir"
     git fetch --tags
     checkout_version_tag "$cloud_init_package_version"
     sed -i "/--deselect 'tests\/unittests\/config\/test_schema.py::TestNetworkSchema::test_network_schema\[net_v2_skipped\]'/a \
     --deselect tests/unittests/test_net.py::TestNetworkdNetRendering::test_networkd_default_generation \\
     --deselect tests/unittests/test_net.py::TestDuplicateMac::test_duplicate_ignored_macs[mscc_felix] \\
     --deselect tests/unittests/test_net.py::TestDuplicateMac::test_duplicate_ignored_macs[fsl_enetc] \\
-    --deselect tests/unittests/test_net.py::TestDuplicateMac::test_duplicate_ignored_macs[qmi_wwan]" "$build_cloud_init_dir/PKGBUILD"
+    --deselect tests/unittests/test_net.py::TestDuplicateMac::test_duplicate_ignored_macs[qmi_wwan]" "$cloud_init_dir/PKGBUILD"
     # sed -i 's/^  netplan/#  netplan/' PKGBUILD
 else
-    cd "$build_cloud_init_dir"
+    cd "$cloud_init_dir"
 fi
 
 makepkg -s --noconfirm -f
 
-# cp -v "$build_netplan_dir"/*.pkg.tar.xz "$output_dir"
-cp -v "$build_cloud_init_dir"/*.pkg.tar.xz "$output_dir"
+# cp -v "$netplan_dir"/*.pkg.tar.xz "$output_dir"
+cp -v "$cloud_init_dir"/*.pkg.tar.xz "$output_dir"
